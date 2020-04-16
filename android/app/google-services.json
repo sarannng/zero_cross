@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "798917593356",
+    "firebase_url": "https://zerocross-a5936.firebaseio.com",
+    "project_id": "zerocross-a5936",
+    "storage_bucket": "zerocross-a5936.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:798917593356:android:82038980bb95625a3c2129",
+        "android_client_info": {
+          "package_name": "com.company.zerocross"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "798917593356-ct3o411t24t23lrd42hqaesqvdce4djs.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCD1R5wGd5C92FSYlIi0cO1W7sx0AwfNWI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "798917593356-ct3o411t24t23lrd42hqaesqvdce4djs.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
