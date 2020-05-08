@@ -22,7 +22,8 @@ class _GameMp1State extends State<GameMp1> {
   String seven;
   String eight;
   String nine;
-
+  bool joiner;
+  bool creater;
   TextStyle temp1 =
       TextStyle(color: Colors.white, fontSize: 40, fontWeight: FontWeight.w500);
   bool lock1;
@@ -38,7 +39,7 @@ class _GameMp1State extends State<GameMp1> {
 
   String docid;
   // void write( ) {
-  //   if (chance == true) {
+  //   if (chance) {
 
   //     setState(() {
   //       three = 'O';
@@ -53,7 +54,94 @@ class _GameMp1State extends State<GameMp1> {
   //   }
   // }
 
-  queryfun(String vari, String datum) {
+  createristrue(creater, joiner){
+
+    print('Createistrue called');
+     if(!creater &&	joiner){
+           showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return WillPopScope(
+                child: AlertDialog(
+                  title: Text('X Player won'),
+                  content: Text('  Congratulations.'),
+                  actions: <Widget>[
+                    new FlatButton(
+                      onPressed: () {
+                        clearboard();
+                        Navigator.pop(context);
+                        print('sarang joiner winning case x');
+                      },
+                      child: new Text('Start again'),
+                    ),
+                  ],
+                ),
+                onWillPop: () {});
+          });
+   
+     }
+     else if(!joiner && creater){
+           showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return WillPopScope(
+                child: AlertDialog(
+                  title: Text('O Player won'),
+                  content: Text('  Congratulations.'),
+                  actions: <Widget>[
+                    new FlatButton(
+                      onPressed: () {
+                        clearboard();
+                        Navigator.pop(context);
+                        print('sarang joiner winning case 0');
+                      },
+                      child: new Text('Start again'),
+                    ),
+                  ],
+                ),
+                onWillPop: () {});
+          });
+   
+     }
+
+     else if(!joiner && !creater && one!='-' && one!=null
+     && two!='-' && two!=null
+     && three!='-' && three!=null
+     && four!='-' && four!=null
+     && five!='-' && five!=null
+     && six!='-' && six!=null
+     && seven!='-' && seven!=null
+     && eight!='-' && eight!=null
+     && nine!='-' && nine!=null
+      ){
+         print('Draw');
+      // return alert;
+
+      showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return WillPopScope(
+                child: AlertDialog(
+                  title: Text('Match Deawn'),
+                  content: Text('  Congratulations both of you '),
+                  actions: <Widget>[
+                    new FlatButton(
+                      onPressed: () {
+                        clearboard();
+                        Navigator.pop(context);
+                      },
+                      child: new Text('Start again'),
+                    ),
+                  ],
+                ),
+                onWillPop: () {});
+          });
+  
+      }
+  }
+
+
+  queryfun(String vari, String datum, String lock) {
     print('========================');
     print(vari);
     print(datum);
@@ -64,6 +152,14 @@ class _GameMp1State extends State<GameMp1> {
         .updateData({
       vari: datum,
     });
+
+    Firestore.instance
+        .collection('rooms')
+        .document('${widget.docid1}')
+        .updateData({
+      lock: false,
+    });
+
   }
 
   getboardvalue() {
@@ -71,7 +167,7 @@ class _GameMp1State extends State<GameMp1> {
         .collection('rooms')
         .document('${widget.docid1}')
         .snapshots();
-    data.listen((onValue) async {
+    data.listen((onValue) {
       //  return await onValue.data['$variable'];
 
       setState(() {
@@ -84,10 +180,12 @@ class _GameMp1State extends State<GameMp1> {
         seven = onValue.data['7'];
         eight = onValue.data['8'];
         nine = onValue.data['9'];
+        creater= onValue.data['creater'];
+        joiner= onValue.data['joiner'];
+        createristrue(creater, joiner);
+        chance = onValue.data['chance'];
+        turn = onValue.data['chance'];
 
-        chance = onValue.data['control'];
-        turn= onValue.data['control'];
-        
         lock1= onValue.data['lock1'];
         lock2= onValue.data['lock2'];
         lock3= onValue.data['lock3'];
@@ -97,7 +195,6 @@ class _GameMp1State extends State<GameMp1> {
         lock7= onValue.data['lock7'];
         lock8= onValue.data['lock8'];
         lock9= onValue.data['lock9'];
-
 
         print(one);
       });
@@ -120,16 +217,19 @@ class _GameMp1State extends State<GameMp1> {
   // }
 
   clearboard() {
-    setState(() {
-      one = two = three = four = five = six = seven = eight = nine = '-';
-      lock1 =
-          lock2 = lock3 = lock4 = lock5 = lock6 = lock7 = lock8 = lock9 = true;
-    });
-
-     Firestore.instance.collection('rooms').document('$docid').setData({
-      'control': true,
-      'playerin': false,
-      'turn': true, 
+    // setState(() {
+    //  // one = two = three = four = five = six = seven = eight = nine = '-';
+    //   // lock1 =
+    //   //     lock2 = lock3 = lock4 = lock5 = lock6 = lock7 = lock8 = lock9 = true;
+    // });
+    print('clear board joiner');
+    Firestore.instance
+        .collection('rooms')
+        .document('${widget.docid1}')
+        .updateData({
+      'chance': true,
+      //'playerin': false,
+      'turn': true,
       '1': '-',
       '2': '-',
       '3': '-',
@@ -139,6 +239,8 @@ class _GameMp1State extends State<GameMp1> {
       '7': '-',
       '8': '-',
       '9': '-',
+      'creater': false,
+      'joiner': false,
       'lock1': true,
       'lock2': true,
       'lock3': true,
@@ -162,26 +264,31 @@ class _GameMp1State extends State<GameMp1> {
         two == 'X' && five == 'X' && eight == 'X')) {
       print('winning case X');
       // return alert;
-
-      showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return WillPopScope(
-                child: AlertDialog(
-                  title: Text('X Player won'),
-                  content: Text('  Congratulations.'),
-                  actions: <Widget>[
-                    new FlatButton(
-                      onPressed: () {
-                        clearboard();
-                        Navigator.pop(context);
-                      },
-                      child: new Text('Start again'),
-                    ),
-                  ],
-                ),
-                onWillPop: () {});
-          });
+ Firestore.instance.collection('rooms').document('${widget.docid1}').updateData({ 
+        'joiner': true,
+      });
+    // if(joiner){
+    //     showDialog(
+    //       context: context,
+    //       builder: (BuildContext context) {
+    //         return WillPopScope(
+    //             child: AlertDialog(
+    //               title: Text('X Player won'),
+    //               content: Text('  Congratulations.'),
+    //               actions: <Widget>[
+    //                 new FlatButton(
+    //                   onPressed: () {
+    //                     clearboard();
+    //                     Navigator.pop(context);
+    //                   },
+    //                   child: new Text('Start again'),
+    //                 ),
+    //               ],
+    //             ),
+    //             onWillPop: () {});
+    //       });
+    
+    // }
     } else if ((one == 'O' && two == 'O' && three == 'O' ||
             one == 'O' && four == 'O' && seven == 'O' ||
             seven == 'O' && eight == 'O' && nine == 'O' ||
@@ -192,74 +299,82 @@ class _GameMp1State extends State<GameMp1> {
         two == 'O' && five == 'O' && eight == 'O') {
       print('winning case O');
       // return alert;
+ Firestore.instance.collection('rooms').document('${widget.docid1}').updateData({ 
+        'joiner': true,
+      });
+  //  if(!joiner){
+  //       showDialog(
+  //         context: context,
+  //         builder: (BuildContext context) {
+  //           return WillPopScope(
+  //               child: AlertDialog(
+  //                 title: Text('O player won'),
+  //                 content: Text('  Congratulations.'),
+  //                 actions: <Widget>[
+  //                   new FlatButton(
+  //                     onPressed: () {
+  //                       clearboard();
+  //                       Navigator.pop(context);
+  //                     },
+  //                     child: new Text('Start again'),
+  //                   ),
+  //                 ],
+  //               ),
+  //               onWillPop: () {});
+  //         });
+   
+   
+  //  }
+     }
+    // else if (one != '-' &&
+    //     two != '-' &&
+    //     three != '-' &&
+    //     four != '-' &&
+    //     five != '-' &&
+    //     six != '-' &&
+    //     seven != '-' &&
+    //     eight != '-' &&
+    //     nine != '-') {
+    //   print('winning case O');
+    //   // return alert;
 
-      showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return WillPopScope(
-                child: AlertDialog(
-                  title: Text('O player won'),
-                  content: Text('  Congratulations.'),
-                  actions: <Widget>[
-                    new FlatButton(
-                      onPressed: () {
-                        clearboard();
-                        Navigator.pop(context);
-                      },
-                      child: new Text('Start again'),
-                    ),
-                  ],
-                ),
-                onWillPop: () {});
-          });
-    } else if (one != '-' &&
-        two != '-' &&
-        three != '-' &&
-        four != '-' &&
-        five != '-' &&
-        six != '-' &&
-        seven != '-' &&
-        eight != '-' &&
-        nine != '-') {
-      print('winning case O');
-      // return alert;
-
-      showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return WillPopScope(
-                child: AlertDialog(
-                  title: Text('Match Deawn'),
-                  content: Text('  Congratulations both of you '),
-                  actions: <Widget>[
-                    new FlatButton(
-                      onPressed: () {
-                        clearboard();
-                        Navigator.pop(context);
-                      },
-                      child: new Text('Go Back'),
-                    ),
-                  ],
-                ),
-                onWillPop: () {});
-          });
-    }
+    //   showDialog(
+    //       context: context,
+    //       builder: (BuildContext context) {
+    //         return WillPopScope(
+    //             child: AlertDialog(
+    //               title: Text('Match Deawn'),
+    //               content: Text('  Congratulations both of you '),
+    //               actions: <Widget>[
+    //                 new FlatButton(
+    //                   onPressed: () {
+    //                     clearboard();
+    //                     Navigator.pop(context);
+    //                   },
+    //                   child: new Text('Go Back'),
+    //                 ),
+    //               ],
+    //             ),
+    //             onWillPop: () {});
+    //       });
+    // }
   }
 
   oneFun() {
-  if(turn!=true){
-      if (lock1 == true) {
+    if (!turn) {
+       if (lock1 == true) {
       print('lok true');
-      if (chance == true) {
+      if (chance) {
         setState(() {
           one = 'O';
-         Firestore.instance
+          Firestore.instance
               .collection('rooms')
               .document('${widget.docid1}')
-              .updateData({'control': false});
-             Firestore.instance.collection('rooms').document('${widget.docid1}').updateData({ 
-          'lock1': false
-        });
+              .updateData({'chance': false});
+          // Firestore.instance
+          //     .collection('rooms')
+          //     .document('${widget.docid1}')
+          //     .updateData({'lock1': false});
         });
 
         // Firestore.instance
@@ -268,7 +383,7 @@ class _GameMp1State extends State<GameMp1> {
         //     .updateData({
         //       '1': '$one',
         //     });
-        queryfun('1', '$one');
+        queryfun('1', '$one', 'lock1');
         check();
       } else {
         setState(() {
@@ -276,10 +391,11 @@ class _GameMp1State extends State<GameMp1> {
           Firestore.instance
               .collection('rooms')
               .document('${widget.docid1}')
-              .updateData({'control': true});
-             Firestore.instance.collection('rooms').document('${widget.docid1}').updateData({ 
-          'lock1': false
-        });
+              .updateData({'chance': true});
+          // Firestore.instance
+          //     .collection('rooms')
+          //     .document('${widget.docid1}')
+          //     .updateData({'lock1': false});
         });
         // Firestore.instance
         //     .collection('rooms')
@@ -287,168 +403,172 @@ class _GameMp1State extends State<GameMp1> {
         //     .updateData({
         //       '1': '$one',
         //     });
-        queryfun('1', '$one');
+        queryfun('1', '$one','lock1');
         check();
       }
+       }
     }
-  }
   }
 
   twoFun() {
-   if(turn!=true){
-      if (lock2 == true) {
-      if (chance == true) {
+    if (!turn) {
+         if (lock2 == true) {
+      if (chance) {
         setState(() {
           two = 'O';
           Firestore.instance
               .collection('rooms')
               .document('${widget.docid1}')
-              .updateData({'control': false});
-             Firestore.instance.collection('rooms').document('${widget.docid1}').updateData({ 
-          'lock2': false
-        });
+              .updateData({'chance': false});
+          // Firestore.instance
+          //     .collection('rooms')
+          //     .document('${widget.docid1}')
+          //     .updateData({'lock2': false});
         });
         check();
-        queryfun('2', '$two');
+        queryfun('2', '$two','lock2');
       } else {
         setState(() {
           two = 'X';
           Firestore.instance
               .collection('rooms')
               .document('${widget.docid1}')
-              .updateData({'control': true});
-             Firestore.instance.collection('rooms').document('${widget.docid1}').updateData({ 
-          'lock2': false
-        });
-        });
+              .updateData({'chance': true});
+        }); // Firestore.instance
+        //     .collection('rooms')
+        //     .document('${widget.docid1}')
+        //     .updateData({'lock2': false});
         check();
-        queryfun('2', '$two');
+        queryfun('2', '$two','lock2');
       }
+         }
     }
-   }
-
   }
 
   threeFun() {
-   if(turn!=true){
-      if (lock3 == true) {
-      if (chance == true) {
+    if (!turn) {
+       if (lock3 == true) {
+      if (chance) {
         setState(() {
-          three = 'O'; 
+          three = 'O';
           Firestore.instance
               .collection('rooms')
               .document('${widget.docid1}')
-              .updateData({'control': false});
-             Firestore.instance.collection('rooms').document('${widget.docid1}').updateData({ 
-          'lock3': false
-        });
+              .updateData({'chance': false});
+          // Firestore.instance
+          //     .collection('rooms')
+          //     .document('${widget.docid1}')
+          //     .updateData({'lock3': false});
         });
         check();
-        queryfun('3', '$three');
+        queryfun('3', '$three','lock3');
       } else {
         setState(() {
           three = 'X';
           Firestore.instance
               .collection('rooms')
               .document('${widget.docid1}')
-              .updateData({'control': true});
-             Firestore.instance.collection('rooms').document('${widget.docid1}').updateData({ 
-          'lock3': false
-        });
+              .updateData({'chance': true});
+          // Firestore.instance
+          //     .collection('rooms')
+          //     .document('${widget.docid1}')
+          //     .updateData({'lock3': false});
         });
         check();
-        queryfun('3', '$three');
+        queryfun('3', '$three','lock3');
       }
+        }
     }
-   }
   }
 
   fourFun() {
-    if(turn!=true){
-      
-    if (lock4 == true) {
-      if (chance == true) {
+    if (!turn) {
+        if (lock4 == true) {
+      if (chance) {
         setState(() {
           four = 'O';
           Firestore.instance
               .collection('rooms')
               .document('${widget.docid1}')
-              .updateData({'control': false});
-             Firestore.instance.collection('rooms').document('${widget.docid1}').updateData({ 
-          'lock4': false
-        });
+              .updateData({'chance': false});
+          // Firestore.instance
+          //     .collection('rooms')
+          //     .document('${widget.docid1}')
+          //     .updateData({'lock4': false});
         });
         check();
-        queryfun('4', '$four');
+        queryfun('4', '$four','lock4');
       } else {
         setState(() {
           four = 'X';
           Firestore.instance
               .collection('rooms')
               .document('${widget.docid1}')
-              .updateData({'control': true});
-             Firestore.instance.collection('rooms').document('${widget.docid1}').updateData({ 
-          'lock4': false
-        });
+              .updateData({'chance': true});
+          // Firestore.instance
+          //     .collection('rooms')
+          //     .document('${widget.docid1}')
+          //     .updateData({'lock4': false});
         });
         check();
-        queryfun('4', '$four');
+        queryfun('4', '$four','lock4');
       }
-    }
+        }
     }
   }
 
   fiveFun() {
-     if(turn!=true){
-        if (lock5 == true) {
-      if (chance == true) {
+    if (!turn) {
+            if (lock5 == true) {
+      if (chance) {
         setState(() {
           five = 'O';
           Firestore.instance
               .collection('rooms')
               .document('${widget.docid1}')
-              .updateData({'control': false});
-             Firestore.instance.collection('rooms').document('${widget.docid1}').updateData({ 
-          'lock5': false
-        });
+              .updateData({'chance': false});
+          // Firestore.instance
+          //     .collection('rooms')
+          //     .document('${widget.docid1}')
+          //     .updateData({'lock5': false});
         });
         check();
-        queryfun('5', '$five');
+        queryfun('5', '$five','lock5');
       } else {
         setState(() {
           five = 'X';
           Firestore.instance
               .collection('rooms')
               .document('${widget.docid1}')
-              .updateData({'control': true});
-             Firestore.instance.collection('rooms').document('${widget.docid1}').updateData({ 
-          'lock5': false
-        });
+              .updateData({'chance': true});
+          // Firestore.instance
+          //     .collection('rooms')
+          //     .document('${widget.docid1}')
+          //     .updateData({'lock5': false});
         });
         check();
-        queryfun('5', '$five');
+        queryfun('5', '$five','lock5');
       }
+         }
     }
-     }
-   
   }
 
   sixFun() {
-     if(turn!=true)
-   {
-      if (lock6 == true) {
-      if (chance == true) {
+    if (!turn) {
+          if (lock6 == true) {
+      if (chance) {
         setState(() {
           six = 'O';
           Firestore.instance
               .collection('rooms')
               .document('${widget.docid1}')
-              .updateData({'control': false});
-             Firestore.instance.collection('rooms').document('${widget.docid1}').updateData({ 
-          'lock6': false
-        });
+              .updateData({'chance': false});
+          // Firestore.instance
+          //     .collection('rooms')
+          //     .document('${widget.docid1}')
+          //     .updateData({'lock6': false});
           check();
-          queryfun('6', '$six');
+          queryfun('6', '$six','lock6');
         });
       } else {
         setState(() {
@@ -456,33 +576,36 @@ class _GameMp1State extends State<GameMp1> {
           Firestore.instance
               .collection('rooms')
               .document('${widget.docid1}')
-              .updateData({'control': true});
-          
-             Firestore.instance.collection('rooms').document('${widget.docid1}').updateData({ 
-          'lock6': false
-        });
+              .updateData({'chance': true});
+
+          // Firestore.instance
+          //     .collection('rooms')
+          //     .document('${widget.docid1}')
+          //     .updateData({'lock6': false});
         });
         check();
-        queryfun('6', '$six');
+        queryfun('6', '$six','lock6');
       }
+        }
     }
-   }
   }
 
   sevenFun() {
-    if(turn!=true){if (lock7 == true) {
-      if (chance == true) {
+    if (!turn) {
+        if (lock7 == true) {
+      if (chance) {
         setState(() {
           seven = 'O';
           Firestore.instance
               .collection('rooms')
               .document('${widget.docid1}')
-              .updateData({'control': false});
-             Firestore.instance.collection('rooms').document('${widget.docid1}').updateData({ 
-          'lock7': false
-        });
+              .updateData({'chance': false});
+          // Firestore.instance
+          //     .collection('rooms')
+          //     .document('${widget.docid1}')
+          //     .updateData({'lock7': false});
           check();
-          queryfun('7', '$seven');
+          queryfun('7', '$seven','lock7');
         });
       } else {
         setState(() {
@@ -490,32 +613,35 @@ class _GameMp1State extends State<GameMp1> {
           Firestore.instance
               .collection('rooms')
               .document('${widget.docid1}')
-              .updateData({'control': true});
-             Firestore.instance.collection('rooms').document('${widget.docid1}').updateData({ 
-          'lock7': false
-        });
+              .updateData({'chance': true});
+          // Firestore.instance
+          //     .collection('rooms')
+          //     .document('${widget.docid1}')
+          //     .updateData({'lock7': false});
         });
         check();
-        queryfun('7', '$seven');
+        queryfun('7', '$seven','lock7');
       }
-    }}
-    
+       }
+    }
   }
 
   eightFun() {
-    if(turn!=true){if (lock8 == true) {
-      if (chance == true) {
+    if (!turn) {
+       if (lock8 == true) {
+      if (chance) {
         setState(() {
           eight = 'O';
           Firestore.instance
               .collection('rooms')
               .document('${widget.docid1}')
-              .updateData({'control': false});
-             Firestore.instance.collection('rooms').document('${widget.docid1}').updateData({ 
-          'lock8': false
-        });
+              .updateData({'chance': false});
+          // Firestore.instance
+          //     .collection('rooms')
+          //     .document('${widget.docid1}')
+          //     .updateData({'lock8': false});
           check();
-          queryfun('8', '$eight');
+          queryfun('8', '$eight','lock8');
         });
       } else {
         setState(() {
@@ -523,66 +649,67 @@ class _GameMp1State extends State<GameMp1> {
           Firestore.instance
               .collection('rooms')
               .document('${widget.docid1}')
-              .updateData({'control': true});
-          ;
-             Firestore.instance.collection('rooms').document('${widget.docid1}').updateData({ 
-          'lock8': false
-        });
+              .updateData({'chance': true});
+
+          // Firestore.instance
+          //     .collection('rooms')
+          //     .document('${widget.docid1}')
+          //     .updateData({'lock8': false});
         });
         check();
-        queryfun('8', '$eight');
+        queryfun('8', '$eight','lock8');
       }
-    }}
-    
+       }
+    }
   }
 
   nineFun() {
-    if(turn!=true){
-      if (lock9 == true) {
-      if (chance == true) {
+    if (!turn) {
+         if (lock9 == true) {
+      if (chance) {
         setState(() {
           nine = 'O';
           Firestore.instance
               .collection('rooms')
               .document('${widget.docid1}')
-              .updateData({'control': false});
-             Firestore.instance.collection('rooms').document('${widget.docid1}').updateData({ 
-          'lock9': false
-        });
+              .updateData({'chance': false});
+          // Firestore.instance
+          //     .collection('rooms')
+          //     .document('${widget.docid1}')
+          //     .updateData({'lock9': false});
         });
         check();
-        queryfun('9', '$nine');
+        queryfun('9', '$nine','lock9');
       } else {
         setState(() {
           nine = 'X';
           Firestore.instance
               .collection('rooms')
               .document('${widget.docid1}')
-              .updateData({'control': true});
-             Firestore.instance.collection('rooms').document('${widget.docid1}').updateData({ 
-          'lock9': false
-        });
+              .updateData({'chance': true});
+          // Firestore.instance
+          //     .collection('rooms')
+          //     .document('${widget.docid1}')
+          //     .updateData({'lock9': false});
         });
         check();
-        queryfun('9', '$nine');
+        queryfun('9', '$nine','lock9');
       }
-    }
-    }
-
-    
-  }
-
-  nullhide() {
-    if (one != null) {
-      setState(() {
-        //temp= TextStyle(color: Colors.black);
-      });
-    } else {
-      setState(() {
-        //temp= TextStyle(color: Colors.white);
-      });
+        }
     }
   }
+
+  // nullhide() {
+  //   if (one != null) {
+  //     setState(() {
+  //       //temp= TextStyle(color: Colors.black);
+  //     });
+  //   } else {
+  //     setState(() {
+  //       //temp= TextStyle(color: Colors.white);
+  //     });
+  //   }
+  // }
 
   @override
   void initState() {
@@ -599,7 +726,18 @@ class _GameMp1State extends State<GameMp1> {
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
-        backgroundColor: Color.fromRGBO(112, 112, 112, 1),
+        // backgroundColor: Color.fromRGBO(112, 112, 112, 1),
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+              borderRadius: BorderRadius.only(topLeft: Radius.circular(30)),
+              gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: <Color>[
+                    Color.fromRGBO(3, 40, 252, 1),
+                    Color.fromRGBO(3, 121, 252, 1),
+                  ])),
+        ),
       ),
       // body: GridView.count(
       //   // Create a grid with 2 columns. If you change the scrollDirection to
@@ -632,6 +770,7 @@ class _GameMp1State extends State<GameMp1> {
       // )
 
       body: Container(
+        decoration: BoxDecoration(),
         child: Column(
           children: <Widget>[
             SizedBox(height: MediaQuery.of(context).size.height / 5),
@@ -710,7 +849,17 @@ class _GameMp1State extends State<GameMp1> {
                   child: Container(
                     height: MediaQuery.of(context).size.height / 7,
                     width: MediaQuery.of(context).size.height / 7,
-                    color: Color.fromRGBO(112, 112, 112, 1),
+                    //color: Color.fromRGBO(112, 112, 112, 1),
+                    decoration: BoxDecoration(
+                        borderRadius:
+                            BorderRadius.only(topLeft: Radius.circular(30)),
+                        gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: <Color>[
+                              Color.fromRGBO(3, 40, 252, 1),
+                              Color.fromRGBO(3, 121, 252, 1),
+                            ])),
                     child: Container(
                       child: Center(
                         child: Text(
@@ -729,7 +878,14 @@ class _GameMp1State extends State<GameMp1> {
                   child: Container(
                     height: MediaQuery.of(context).size.height / 7,
                     width: MediaQuery.of(context).size.height / 7,
-                    color: Color.fromRGBO(112, 112, 112, 1),
+                    decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: <Color>[
+                          Color.fromRGBO(3, 40, 252, 1),
+                          Color.fromRGBO(3, 121, 252, 1),
+                        ])),
                     child: Container(
                       child: Center(
                         child: Text(
@@ -747,7 +903,16 @@ class _GameMp1State extends State<GameMp1> {
                   child: Container(
                     height: MediaQuery.of(context).size.height / 7,
                     width: MediaQuery.of(context).size.height / 7,
-                    color: Color.fromRGBO(112, 112, 112, 1),
+                    decoration: BoxDecoration(
+                        borderRadius:
+                            BorderRadius.only(topRight: Radius.circular(30)),
+                        gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: <Color>[
+                              Color.fromRGBO(3, 40, 252, 1),
+                              Color.fromRGBO(3, 121, 252, 1),
+                            ])),
                     child: Container(
                       child: Center(
                         child: Text(
@@ -770,7 +935,14 @@ class _GameMp1State extends State<GameMp1> {
                   child: Container(
                     height: MediaQuery.of(context).size.height / 7,
                     width: MediaQuery.of(context).size.height / 7,
-                    color: Color.fromRGBO(112, 112, 112, 1),
+                    decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: <Color>[
+                          Color.fromRGBO(3, 40, 252, 1),
+                          Color.fromRGBO(3, 121, 252, 1),
+                        ])),
                     child: Container(
                       child: Center(
                         child: Text(
@@ -788,7 +960,14 @@ class _GameMp1State extends State<GameMp1> {
                   child: Container(
                     height: MediaQuery.of(context).size.height / 7,
                     width: MediaQuery.of(context).size.height / 7,
-                    color: Color.fromRGBO(112, 112, 112, 1),
+                    decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: <Color>[
+                          Color.fromRGBO(3, 40, 252, 1),
+                          Color.fromRGBO(3, 121, 252, 1),
+                        ])),
                     child: Container(
                       child: Center(
                         child: Text(
@@ -806,7 +985,14 @@ class _GameMp1State extends State<GameMp1> {
                   child: Container(
                     height: MediaQuery.of(context).size.height / 7,
                     width: MediaQuery.of(context).size.height / 7,
-                    color: Color.fromRGBO(112, 112, 112, 1),
+                    decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: <Color>[
+                          Color.fromRGBO(3, 40, 252, 1),
+                          Color.fromRGBO(3, 121, 252, 1),
+                        ])),
                     child: Container(
                       child: Center(
                         child: Text(
@@ -829,7 +1015,16 @@ class _GameMp1State extends State<GameMp1> {
                   child: Container(
                     height: MediaQuery.of(context).size.height / 7,
                     width: MediaQuery.of(context).size.height / 7,
-                    color: Color.fromRGBO(112, 112, 112, 1),
+                    decoration: BoxDecoration(
+                        borderRadius:
+                            BorderRadius.only(bottomLeft: Radius.circular(30)),
+                        gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: <Color>[
+                              Color.fromRGBO(3, 40, 252, 1),
+                              Color.fromRGBO(3, 121, 252, 1),
+                            ])),
                     child: Container(
                       child: Center(
                         child: Text(
@@ -847,7 +1042,14 @@ class _GameMp1State extends State<GameMp1> {
                   child: Container(
                     height: MediaQuery.of(context).size.height / 7,
                     width: MediaQuery.of(context).size.height / 7,
-                    color: Color.fromRGBO(112, 112, 112, 1),
+                    decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: <Color>[
+                          Color.fromRGBO(3, 40, 252, 1),
+                          Color.fromRGBO(3, 121, 252, 1),
+                        ])),
                     child: Container(
                       child: Center(
                         child: Text(
@@ -865,7 +1067,16 @@ class _GameMp1State extends State<GameMp1> {
                   child: Container(
                     height: MediaQuery.of(context).size.height / 7,
                     width: MediaQuery.of(context).size.height / 7,
-                    color: Color.fromRGBO(112, 112, 112, 1),
+                    decoration: BoxDecoration(
+                        borderRadius:
+                            BorderRadius.only(bottomRight: Radius.circular(20)),
+                        gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: <Color>[
+                              Color.fromRGBO(3, 40, 252, 1),
+                              Color.fromRGBO(3, 121, 252, 1),
+                            ])),
                     child: Container(
                       child: Center(
                         child: Text(
